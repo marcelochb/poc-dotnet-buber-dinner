@@ -12,6 +12,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
     {
 
         var signingCredentials = new SigningCredentials(
+            // file deepcode ignore HardcodedSecret: <please specify a reason of ignoring this>
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super-security-secret-key-buber-dinner")),
             SecurityAlgorithms.HmacSha256);
         var claims = new[]
