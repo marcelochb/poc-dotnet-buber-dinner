@@ -12,19 +12,18 @@ public class JwtTokenGenerator : IJwtTokenGenerator
     {
 
         var signingCredentials = new SigningCredentials(
-            // deepcode ignore HardcoadedSecret: <please specify a reason of ignoring this>
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super-secret-key")),
-            SecurityAlgorithms.HmacSha256Signature);
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super-security-secret-key-buber-dinner")),
+            SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.GivenName, firstName),
             new Claim(JwtRegisteredClaimNames.FamilyName, lastName),
-            new Claim(JwtRegisteredClaimNames.UniqueName, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
       var securityToken = new JwtSecurityToken(
-        issuer: "BuberDinner",
+          issuer: "BuberDinner",
           claims: claims,
           expires: DateTime.Now.AddDays(1),
           signingCredentials: signingCredentials);
