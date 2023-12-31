@@ -1,6 +1,7 @@
 using BuberDinner.Application.Services.Authentication;
 using BuberDinner.Contracts.Authentication;
 using ErrorOr;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.Api.Controllers;
@@ -9,11 +10,13 @@ public class AuthenticationController : ApiController
 {
 
   private readonly IAuthenticationService _authenticationService;
+  private readonly IMapper _mapper;
 
-  public AuthenticationController(IAuthenticationService authenticationService)
-  {
-      _authenticationService = authenticationService;
-  }
+    public AuthenticationController(IAuthenticationService authenticationService, IMapper mapper)
+    {
+        _authenticationService = authenticationService;
+        _mapper = mapper;
+    }
 
     [HttpPost("register")]
   public IActionResult Register(RegisterRequest request)
@@ -25,7 +28,7 @@ public class AuthenticationController : ApiController
             request.Password);
 
         return authResult.Match(
-          authResult => Ok(MapAuthResult(authResult)),
+          authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
           errors => Problem(errors)
         );
     }
@@ -35,19 +38,8 @@ public class AuthenticationController : ApiController
   {
     var authResult = _authenticationService.Login(request.Email, request.Password);
     return authResult.Match(
-      authResult => Ok(MapAuthResult(authResult)),
+      authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
       errors => Problem(errors)
     );
   }
-
-      private static AuthenticationResponse MapAuthResult(AuthenticationResult authResult)
-    {
-        return new AuthenticationResponse(
-            authResult.user.Id,
-            authResult.user.FirstName,
-            authResult.user.LastName,
-            authResult.user.Email,
-            authResult.Token);
-    }
-
 }
