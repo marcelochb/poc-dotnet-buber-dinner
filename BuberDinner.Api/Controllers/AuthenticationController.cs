@@ -1,4 +1,6 @@
-using BuberDinner.Application.Services.Authentication;
+using BuberDinner.Application.Services.Authentication.Commands;
+using BuberDinner.Application.Services.Authentication.Common;
+using BuberDinner.Application.Services.Authentication.Queries;
 using BuberDinner.Contracts.Authentication;
 using ErrorOr;
 using MapsterMapper;
@@ -9,19 +11,21 @@ namespace BuberDinner.Api.Controllers;
 public class AuthenticationController : ApiController
 {
 
-  private readonly IAuthenticationService _authenticationService;
+  private readonly IAuthenticationCommandService _authenticationCommandService;
+  private readonly IAuthenticationQueryService _authenticationQueryService;
   private readonly IMapper _mapper;
 
-    public AuthenticationController(IAuthenticationService authenticationService, IMapper mapper)
+    public AuthenticationController(IAuthenticationCommandService authenticationCommandService, IAuthenticationQueryService authenticationQueryService, IMapper mapper)
     {
-        _authenticationService = authenticationService;
+        _authenticationCommandService = authenticationCommandService;
+        _authenticationQueryService = authenticationQueryService;
         _mapper = mapper;
     }
 
     [HttpPost("register")]
   public IActionResult Register(RegisterRequest request)
     {
-        ErrorOr<AuthenticationResult> authResult = _authenticationService.Register(
+        ErrorOr<AuthenticationResult> authResult = _authenticationCommandService.Register(
             request.FirstName,
             request.LastName,
             request.Email,
@@ -36,7 +40,7 @@ public class AuthenticationController : ApiController
     [HttpPost("login")]
   public IActionResult Login(LoginRequest request)
   {
-    var authResult = _authenticationService.Login(request.Email, request.Password);
+    var authResult = _authenticationQueryService.Login(request.Email, request.Password);
     return authResult.Match(
       authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
       errors => Problem(errors)

@@ -1,39 +1,22 @@
 using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
+using BuberDinner.Application.Services.Authentication.Common;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
 using ErrorOr;
 
-namespace BuberDinner.Application.Services.Authentication;
+namespace BuberDinner.Application.Services.Authentication.Commands;
 
-public class AuthenticationService : IAuthenticationService
+public class AuthenticationCommandService : IAuthenticationCommandService
 {
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IUserRepository _userRepository;
 
-    public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+    public AuthenticationCommandService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
     {
         _jwtTokenGenerator = jwtTokenGenerator;
         _userRepository = userRepository;
     }
-    public ErrorOr<AuthenticationResult> Login(string email, string password)
-    {
-        // 1 - Validate the user exists
-        if (_userRepository.GetUserByEmail(email) is not User user)
-        {
-            return Errors.Authentication.InvalidCredential;
-        }
-
-        // 2 - Validate the password is correct
-        if (user.Password != password)
-        {
-            return new[] { Errors.Authentication.InvalidCredential };
-        }
-        // 3 - Generate JWT token
-        var token = _jwtTokenGenerator.GeneratorToken(user);
-        return new AuthenticationResult(user,token);
-    }
-
     public ErrorOr<AuthenticationResult> Register(
         string firstName,
         string lastName,
@@ -46,7 +29,8 @@ public class AuthenticationService : IAuthenticationService
             return Errors.User.DuplicateEmail;
         }
         // 2 - Create user (generate unique Id) & persiste to DB
-        var user = new User{
+        var user = new User
+        {
             Id = Guid.NewGuid(),
             FirstName = firstName,
             LastName = lastName,
@@ -56,6 +40,6 @@ public class AuthenticationService : IAuthenticationService
         _userRepository.Add(user);
         // 3 - Generate JWT token
         var token = _jwtTokenGenerator.GeneratorToken(user);
-      return new AuthenticationResult(user,token);
+        return new AuthenticationResult(user, token);
     }
 }
